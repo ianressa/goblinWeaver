@@ -9,14 +9,15 @@ public enum AddedValueEnum {
     CVE_AGGREGATED,
     FRESHNESS,
     FRESHNESS_AGGREGATED,
+    LICENSE,
     POPULARITY_1_YEAR,
     POPULARITY_1_YEAR_AGGREGATED,
     SPEED;
 
     public NodeType getTargetNodeType(){
         return switch (this) {
-            case CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, POPULARITY_1_YEAR, POPULARITY_1_YEAR_AGGREGATED -> NodeType.RELEASE;
-            case SPEED -> NodeType.ARTIFACT;
+	    case CVE, CVE_AGGREGATED, FRESHNESS, FRESHNESS_AGGREGATED, LICENSE, POPULARITY_1_YEAR, POPULARITY_1_YEAR_AGGREGATED -> NodeType.RELEASE;
+	    case SPEED -> NodeType.ARTIFACT;
         };
     }
 
@@ -26,6 +27,7 @@ public enum AddedValueEnum {
             case CVE_AGGREGATED -> CveAggregated.class;
             case FRESHNESS -> Freshness.class;
             case FRESHNESS_AGGREGATED -> FreshnessAggregated.class;
+	    case LICENSE -> License.class;
             case POPULARITY_1_YEAR -> Popularity1Year.class;
             case POPULARITY_1_YEAR_AGGREGATED -> Popularity1YearAggregated.class;
             case SPEED -> Speed.class;
