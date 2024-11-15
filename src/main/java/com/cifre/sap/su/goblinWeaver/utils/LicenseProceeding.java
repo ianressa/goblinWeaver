@@ -2,8 +2,15 @@ package com.cifre.sap.su.goblinWeaver.utils;
 
 import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseData;
 import org.apache.commons.io.FileUtils;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.Attributes;
 
 import java.io.*;
+import java.lang.StringBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumMap;
@@ -49,6 +56,97 @@ public class LicenseProceeding {
 	    return null;
     }
 
+    private static File downloadLicenseFromText(URL url, File outfile){
+	System.out.println("Trying TXT url at " + url.toString());
+	try(InputStream in = url.openStream();){
+	    if(outfile.exists()){
+		outfile.delete();
+	    }
+	    FileOutputStream outStream = new FileOutputStream(outfile);
+	    for (int n = in.read(); n != -1; n = in.read()){
+		outStream.write(n);
+	    }
+	    outStream.close();
+	    in.close();
+	    return outfile;
+	} catch (IOException e){
+	    e.printStackTrace();
+	    return null;
+	}
+    }
+
+    private static File downloadLicenseFromJar(URL url, File outfile){
+	System.out.println("Trying JAR URL at " + url.toString());
+	try(InputStream in = url.openStream();
+	    JarInputStream jarIn = new JarInputStream(in)){
+	    JarEntry je;
+	    while ((je = jarIn.getNextJarEntry()) != null){
+		if (je.getName().endsWith("LICENSE") || je.getName().endsWith("LICENSE.txt")) {
+		    System.out.println("Found LICENSE in archive at " + je.getName());
+		    if(outfile.exists()) {
+			outfile.delete();
+		    }
+		    FileOutputStream outStream = new FileOutputStream(outfile);
+		    for (int n = jarIn.read(); n != -1; n = jarIn.read()) {
+			outStream.write(n);
+		    }
+		    outStream.close();
+		    jarIn.closeEntry();
+		    return outfile;
+		}
+	    }
+	    System.out.println("No error, but could not find LICENSE in jar");
+	    jarIn.closeEntry();
+	    return null;
+	} catch (IOException e){
+	    e.printStackTrace();
+	    return null;
+	}
+    }
+
+    private static File downloadLicenseFromPom(URL url, File outfile){
+	System.out.println("Trying POM URL at " + url.toString());
+	try(InputStream in = url.openStream();){
+	    try{
+		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+		SAXParser parser = parserFactory.newSAXParser();
+		POMLicenseHandler licenseHandler = new POMLicenseHandler();
+		parser.parse(in, licenseHandler);
+		if (licenseHandler.licenseURL != null){
+		    return downloadLicenseFromText(licenseHandler.licenseURL, outfile);
+		}
+		return null;
+	    } catch (SAXException e){
+		e.printStackTrace();
+		return null;
+	    } catch (ParserConfigurationException e){
+		e.printStackTrace();
+		return null;
+	    }
+	} catch (IOException e){
+	    e.printStackTrace();
+	    return null;
+	}
+    }
+
+    private static class POMLicenseHandler extends DefaultHandler{
+	public URL licenseURL = null;
+
+	@Override
+	public void startElement(String uri, String lName, String qName, Attributes attr) throws SAXException{
+	    if (qName == "license"){
+		String urlAttr = attr.getValue("url");
+		try {
+		    if (urlAttr != null){ licenseURL = new URL(urlAttr); }
+		} catch (MalformedURLException e){
+		    e.printStackTrace();
+		    licenseURL = null;
+		}
+	    }
+	}
+    }
+
+
     private static File downloadLicenseData(String groupId, String artifactId, String version){
 	System.out.println("Downloading license data for " + groupId + ":" + artifactId + ":" + version);
 	File rootDir = new File(ROOT_PATH);
@@ -66,35 +164,20 @@ public class LicenseProceeding {
 	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					 "/" + artifactId + "/" + version + "/" +
 					 artifactId + "-" + version + ".jar"));
-	    System.out.println("Trying JAR URL at " + url.toString());
-	    try(InputStream in = url.openStream();
-		JarInputStream jarIn = new JarInputStream(in)){
-		JarEntry je;
-		while ((je = jarIn.getNextJarEntry()) != null){
-		    if (je.getName().endsWith("LICENSE") || je.getName().endsWith("LICENSE.txt")) {
-			System.out.println("Found LICENSE in archive at " + je.getName());
-			if(outfile.exists()) {
-			    outfile.delete();
-			}
-			FileOutputStream outStream = new FileOutputStream(outfile);
-			for (int n = jarIn.read(); n != -1; n = jarIn.read()) {
-			    outStream.write(n);
-			}
-			outStream.close();
-			jarIn.closeEntry();
-			return outfile;
-		    }
-		}
-		System.out.println("No error, but could not find LICENSE in jar");
-		jarIn.closeEntry();
-		return null;
-	    } catch(IOException e){
-		e.printStackTrace();
-		return null;
-	    }
+	    File jarLicense = downloadLicenseFromJar(url, outfile);
+	    if (jarLicense != null){ return jarLicense; }
 	} catch (MalformedURLException e){
 	    e.printStackTrace();
-	    return null;
 	}
+	try {
+	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
+					 "/" + artifactId + "/" + version + "/" +
+					 artifactId + "-" + version + ".pom"));
+	    File pomLicense = downloadLicenseFromPom(url, outfile);
+	    if (pomLicense != null){ return pomLicense; }
+	} catch (MalformedURLException e){
+	    e.printStackTrace();
+	}
+	return null;
     }
 }
