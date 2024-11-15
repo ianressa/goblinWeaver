@@ -107,7 +107,7 @@ public class LicenseProceeding {
 	versionDir.mkdirs();
 	
 	try {
-	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") + "/" +
+	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					 "/" + artifactId + "/" + version + "/" +
 					 artifactId + "-" + version + ".jar"));
 	    try(InputStream in = url.openStream();
