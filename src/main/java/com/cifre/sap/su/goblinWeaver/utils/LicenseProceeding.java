@@ -37,6 +37,7 @@ public class LicenseProceeding {
 	try (FileInputStream licenseIn = new FileInputStream(licenseFile)) {
 	    for (EnumMap.Entry<LicenseData.LicenseEnum, File> entry : LicenseData.LicenseFileMap.entrySet()) {
 		try(FileInputStream licenseMapIn = new FileInputStream(entry.getValue())){
+		    System.out.println("Checking if " + licenseFile.getName() + " is equivalent to " + entry.getValue().getName());
 		    if (IOUtils.contentEquals(licenseIn, licenseMapIn)) {
 			licenseIn.close();
 			licenseMapIn.close();
@@ -52,6 +53,7 @@ public class LicenseProceeding {
 	    e.printStackTrace();
 	    return null;
 	}
+	System.out.println("No error, but no existing license matched " + licenseFile.getName());
 	return null;
     }
 
