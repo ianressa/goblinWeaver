@@ -1,7 +1,7 @@
 package com.cifre.sap.su.goblinWeaver.utils;
 
 import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseData;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -34,33 +34,24 @@ public class LicenseProceeding {
 	}
 
     private static LicenseData.LicenseEnum inferLicenseFromFile(File licenseFile) {
-	try (FileInputStream licenseIn = new FileInputStream(licenseFile)) {
-	    for (EnumMap.Entry<LicenseData.LicenseEnum, File> entry : LicenseData.LicenseFileMap.entrySet()) {
-		try(FileInputStream licenseMapIn = new FileInputStream(entry.getValue())){
-		    System.out.println("Checking if " + licenseFile.getName() + " is equivalent to " + entry.getValue().getName());
-		    if (IOUtils.contentEquals(licenseIn, licenseMapIn)) {
-			licenseIn.close();
-			licenseMapIn.close();
-			return entry.getKey();
-		    }
-		    licenseMapIn.close();
-		} catch (IOException e) {
-		    e.printStackTrace();
-		    return null;
+	try {
+	    for (EnumMap.Entry<LicenseData.LicenseEnum, File> entry : LicenseData.LicenseFileMap.entrySet()){
+		System.out.println("Checking if " + licenseFile.getName() + " is equivalent to " + entry.getValue().getName());
+		if (FileUtils.contentEquals(licenseFile, entry.getValue())) {
+		    return entry.getKey();
 		}
 	    }
-	} catch (IOException e) {
+	} catch (IOException e){
 	    e.printStackTrace();
 	    return null;
 	}
-	System.out.println("No error, but no existing license matched " + licenseFile.getName());
-	return null;
+	    System.out.println("No error, but no existing license matched " + licenseFile.getName());
+	    return null;
     }
 
     private static File downloadLicenseData(String groupId, String artifactId, String version){
 	System.out.println("Downloading license data for " + groupId + ":" + artifactId + ":" + version);
 	File rootDir = new File(ROOT_PATH);
-	File dataDir = new File(DATA_PATH);
 	File groupDir = new File(DATA_PATH + File.separator + groupId);
 	File artifactDir = new File(groupDir + File.separator + artifactId);
 	File versionDir = new File(artifactDir + File.separator + version);
