@@ -14,7 +14,7 @@ import java.util.jar.JarInputStream;
 public class LicenseProceeding {
     private static final String ROOT_PATH = ConstantProperties.licenseDataFolderPath;
     private static final String DATA_PATH = ROOT_PATH + File.separator + "maven";
-    private static final String REPOSITORY_URL = "https://mvnrepository.com";
+    private static final String REPOSITORY_URL = "https://repo1.maven.org/maven2";
 
 	public static LicenseData.LicenseEnum getLicenseFromId(String nodeId) {
 	    String[] splitNodeId = nodeId.split(":");
@@ -95,6 +95,7 @@ public class LicenseProceeding {
 
     private static boolean downloadLicenseData(String groupId, String artifactId, String version){
 	System.out.println("Downloading license data for " + groupId + ":" + artifactId + ":" + version);
+	String[] TldDomain = groupId.split(".");
 	File rootDir = new File(ROOT_PATH);
 	File dataDir = new File(DATA_PATH);
 	File groupDir = new File(DATA_PATH + File.separator + groupId);
@@ -107,7 +108,7 @@ public class LicenseProceeding {
 	versionDir.mkdirs();
 	
 	try {
-	    URL url = new URL(new String(REPOSITORY_URL + "/" + "artifact" + "/" + groupId +
+	    URL url = new URL(new String(REPOSITORY_URL + "/" + TldDomain[0] + "/" + TldDomain[1] + "/" +
 					 "/" + artifactId + "/" + version + "/" +
 					 artifactId + "-" + version + ".jar"));
 	    try(InputStream in = url.openStream();
