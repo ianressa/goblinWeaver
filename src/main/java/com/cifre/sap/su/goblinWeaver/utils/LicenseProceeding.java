@@ -73,11 +73,13 @@ public class LicenseProceeding {
 	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					 "/" + artifactId + "/" + version + "/" +
 					 artifactId + "-" + version + ".jar"));
+	    System.out.println("Trying JAR URL at " + url.toString());
 	    try(InputStream in = url.openStream();
 		JarInputStream jarIn = new JarInputStream(in)){
 		JarEntry je;
 		while ((je = jarIn.getNextJarEntry()) != null){
-		    if (je.getName().equals("/META-INF/LICENSE")) {
+		    if (je.getName().endsWith("LICENSE") || je.getName().endsWith("LICENSE.txt")) {
+			System.out.println("Found LICENSE in archive at " + je.getName());
 			if(outfile.exists()) {
 			    outfile.delete();
 			}
@@ -90,6 +92,7 @@ public class LicenseProceeding {
 			return outfile;
 		    }
 		}
+		System.out.println("No error, but could not find LICENSE in jar");
 		jarIn.closeEntry();
 		return null;
 	    } catch(IOException e){
