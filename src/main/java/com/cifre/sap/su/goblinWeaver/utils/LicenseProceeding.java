@@ -95,7 +95,6 @@ public class LicenseProceeding {
 
     private static boolean downloadLicenseData(String groupId, String artifactId, String version){
 	System.out.println("Downloading license data for " + groupId + ":" + artifactId + ":" + version);
-	String[] TldDomain = groupId.split(".");
 	File rootDir = new File(ROOT_PATH);
 	File dataDir = new File(DATA_PATH);
 	File groupDir = new File(DATA_PATH + File.separator + groupId);
@@ -108,7 +107,7 @@ public class LicenseProceeding {
 	versionDir.mkdirs();
 	
 	try {
-	    URL url = new URL(new String(REPOSITORY_URL + "/" + TldDomain[0] + "/" + TldDomain[1] + "/" +
+	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") + "/" +
 					 "/" + artifactId + "/" + version + "/" +
 					 artifactId + "-" + version + ".jar"));
 	    try(InputStream in = url.openStream();
