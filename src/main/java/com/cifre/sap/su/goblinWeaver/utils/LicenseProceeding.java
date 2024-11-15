@@ -131,17 +131,37 @@ public class LicenseProceeding {
 
     private static class POMLicenseHandler extends DefaultHandler{
 	public URL licenseURL = null;
+	private boolean readingLicenseElement = false;
+	private StringBuilder stringBuilder = null;
+
+	@Override
+	public void characters(char ch[], int start, int length){
+	    if (stringBuilder != null){
+		stringBuilder.append(ch, start, length);
+	    }
+	}
 
 	@Override
 	public void startElement(String uri, String lName, String qName, Attributes attr) throws SAXException{
-	    if (qName == "license"){
-		String urlAttr = attr.getValue("url");
-		try {
-		    if (urlAttr != null){ licenseURL = new URL(urlAttr); }
+	    if (qName == "license" && licenseURL != null){
+		readingLicenseElement = true;
+	    }
+	    if (qName == "url" && readingLicenseElement){
+		stringBuilder = new StringBuilder();
+	    }
+	}
+
+	@Override
+	public void endElement(String uri, String lName, String qName) throws SAXException{
+	    if (qName == "url" && readingLicenseElement){
+		readingLicenseElement = false;
+		try{
+		    licenseURL = new URL(stringBuilder.toString());
 		} catch (MalformedURLException e){
 		    e.printStackTrace();
 		    licenseURL = null;
 		}
+		stringBuilder = null;
 	    }
 	}
     }
