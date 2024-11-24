@@ -134,9 +134,10 @@ public class LicenseProceeding {
 
 		// Log license name for survey
 		String logText = new String();
-		logText = new String(
+		logText = new String("\t" +
 				     ((licenseHandler.licenseName != null) ? licenseHandler.licenseName : "No_License_Name") +
-				     ((licenseHandler.licenseURL != null) ? " (" + licenseHandler.licenseURL + ")" : " (No_License_URL)"));
+				     "\t" +
+				     ((licenseHandler.licenseURL != null) ? "(" + licenseHandler.licenseURL + ")" : "(No_License_URL)"));
 		logger.info(logText);
 		// This is a bad way to do this. Links to licenses almost never lead directly to pure license text.
 		//if (licenseHandler.licenseURL != null){
