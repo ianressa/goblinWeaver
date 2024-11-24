@@ -11,6 +11,10 @@ import org.xml.sax.Attributes;
 
 import java.io.*;
 import java.lang.StringBuilder;
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumMap;
@@ -22,6 +26,22 @@ public class LicenseProceeding {
     private static final String ROOT_PATH = ConstantProperties.licenseDataFolderPath;
     private static final String DATA_PATH = ROOT_PATH + File.separator + "maven";
     private static final String REPOSITORY_URL = "https://repo1.maven.org/maven2";
+
+    private static Logger logger = Logger.getLogger("licenseLog");
+    private static SimpleFormatter formatter = new SimpleFormatter();
+    private static FileHandler handler;
+
+    public LicenseProceeding(){
+	try {
+	    handler = new FileHandler("./licenseLog.log");
+	    logger.addHandler(handler);
+	    handler.setFormatter(formatter);
+	} catch (SecurityException e) {
+		e.printStackTrace();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+    }
 
     public static LicenseData.LicenseEnum getLicenseFromId(String nodeId) {
 	String[] splitNodeId = nodeId.split(":");
@@ -111,9 +131,22 @@ public class LicenseProceeding {
 		SAXParser parser = parserFactory.newSAXParser();
 		POMLicenseHandler licenseHandler = new POMLicenseHandler();
 		parser.parse(in, licenseHandler);
-		if (licenseHandler.licenseURL != null){
-		    return downloadLicenseFromText(licenseHandler.licenseURL, outfile);
+
+		// Log license name for survey
+		if (licenseHandler.licenseName != null) {
+		    String logText = new String();
+		    if (licenseHandler.licenseURL != null) {
+			logText = new String(licenseHandler.licenseName + " (" + licenseHandler.licenseURL + ")");
+		    }
+		    else{
+			logText = new String(licenseHandler.licenseName);
+		    }
+		    logger.info(logText);
 		}
+		// This is a bad way to do this. Links to licenses almost never lead directly to pure license text.
+		//if (licenseHandler.licenseURL != null){
+		//    return downloadLicenseFromText(licenseHandler.licenseURL, outfile);
+		//}
 		return null;
 	    } catch (SAXException e){
 		e.printStackTrace();
@@ -188,16 +221,6 @@ public class LicenseProceeding {
 	    rootDir.delete();
 	}
 	versionDir.mkdirs();
-	
-	try {
-	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
-					 "/" + artifactId + "/" + version + "/" +
-					 artifactId + "-" + version + ".jar"));
-	    File jarLicense = downloadLicenseFromJar(url, outfile);
-	    if (jarLicense != null){ return jarLicense; }
-	} catch (MalformedURLException e){
-	    e.printStackTrace();
-	}
 	try {
 	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					 "/" + artifactId + "/" + version + "/" +
