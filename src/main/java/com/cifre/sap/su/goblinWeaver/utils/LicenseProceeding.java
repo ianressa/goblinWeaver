@@ -33,7 +33,7 @@ public class LicenseProceeding {
 
     public LicenseProceeding(){
 	try {
-	    handler = new FileHandler("./licenseLog.log");
+	    handler = new FileHandler("/tmp/goblinWeaver_licenseLog.log");
 	    logger.addHandler(handler);
 	    handler.setFormatter(formatter);
 	} catch (SecurityException e) {
@@ -133,16 +133,11 @@ public class LicenseProceeding {
 		parser.parse(in, licenseHandler);
 
 		// Log license name for survey
-		if (licenseHandler.licenseName != null) {
-		    String logText = new String();
-		    if (licenseHandler.licenseURL != null) {
-			logText = new String(licenseHandler.licenseName + " (" + licenseHandler.licenseURL + ")");
-		    }
-		    else{
-			logText = new String(licenseHandler.licenseName);
-		    }
-		    logger.info(logText);
-		}
+		String logText = new String();
+		logText = new String(
+				     ((licenseHandler.licenseName != null) ? licenseHandler.licenseName : "No_License_Name") +
+				     ((licenseHandler.licenseURL != null) ? " (" + licenseHandler.licenseURL + ")" : " (No_License_URL)"));
+		logger.info(logText);
 		// This is a bad way to do this. Links to licenses almost never lead directly to pure license text.
 		//if (licenseHandler.licenseURL != null){
 		//    return downloadLicenseFromText(licenseHandler.licenseURL, outfile);
