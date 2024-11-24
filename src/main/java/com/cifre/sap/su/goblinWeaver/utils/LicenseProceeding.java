@@ -31,7 +31,7 @@ public class LicenseProceeding {
     private static SimpleFormatter formatter = new SimpleFormatter();
     private static FileHandler handler;
 
-    public LicenseProceeding(){
+    public static void InitLicenseLogging(){
 	try {
 	    handler = new FileHandler("/tmp/goblinWeaver_licenseLog.log");
 	    logger.addHandler(handler);
