@@ -23,22 +23,21 @@ public class LicenseProceeding {
     private static final String DATA_PATH = ROOT_PATH + File.separator + "maven";
     private static final String REPOSITORY_URL = "https://repo1.maven.org/maven2";
 
-	public static LicenseData.LicenseEnum getLicenseFromId(String nodeId) {
-	    String[] splitNodeId = nodeId.split(":");
-	    if (splitNodeId.length != 3){
-		return null;
-	    }
-	    String groupId = splitNodeId[0];
-	    String artifactId = splitNodeId[1];
-	    String version = splitNodeId[2];
-
-	    
-	    File licenseFile = downloadLicenseData(groupId, artifactId, version);
-	    if(licenseFile != null){
-		return inferLicenseFromFile(licenseFile);
-	    }
+    public static LicenseData.LicenseEnum getLicenseFromId(String nodeId) {
+	String[] splitNodeId = nodeId.split(":");
+	if (splitNodeId.length != 3){
 	    return null;
 	}
+	String groupId = splitNodeId[0];
+	String artifactId = splitNodeId[1];
+	String version = splitNodeId[2];
+
+	File licenseFile = downloadLicenseData(groupId, artifactId, version);
+	if(licenseFile != null){
+	    return inferLicenseFromFile(licenseFile);
+	}
+	return null;
+    }
 
     private static LicenseData.LicenseEnum inferLicenseFromFile(File licenseFile) {
 	try {
