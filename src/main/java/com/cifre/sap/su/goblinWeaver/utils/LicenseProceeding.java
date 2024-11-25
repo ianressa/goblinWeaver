@@ -26,8 +26,6 @@ import java.util.jar.JarInputStream;
 
 
 public class LicenseProceeding {
-    private static final String ROOT_PATH = ConstantProperties.licenseDataFolderPath;
-    private static final String DATA_PATH = ROOT_PATH + File.separator + "maven";
     private static final String REPOSITORY_URL = "https://repo1.maven.org/maven2";
 
     private static Logger logger = Logger.getLogger("licenseLog");
