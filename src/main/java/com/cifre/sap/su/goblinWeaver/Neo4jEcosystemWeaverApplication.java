@@ -14,13 +14,20 @@ public class Neo4jEcosystemWeaverApplication {
 	public static void main(String[] args) {
 		LicenseProceeding.InitLicenseLogging();
 		LicenseMemory.initMemory();
+		Runtime.getRuntime().addShutdownHook(
+						     new Thread("shutdown_hook"){
+							 @Override
+							 public void run() {
+							     LicenseMemory.writeMemory();
+							 }
+						     }
+						     );
 		/*
 		GraphDatabaseSingleton.getInstance(); // Init database connection
 		GraphUpdatedChecker.deleteAddedValuesIfUpdated(); // Check if database was updated
 		OsvProceeding.initOsvData(args); // Download CVE dataset
 		*/
 		SpringApplication.run(Neo4jEcosystemWeaverApplication.class, args); // Run API
-		LicenseMemory.writeMemory();
 	}
 
 }
