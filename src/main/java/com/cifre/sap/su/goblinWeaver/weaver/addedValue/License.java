@@ -4,7 +4,7 @@ import com.cifre.sap.su.goblinWeaver.utils.LicenseProceeding;
 
 import java.util.*;
 
-public class License extends AbstractAddedValue<LicenseData.LicenseEnum>{
+public class License extends AbstractAddedValue<String>{
 
     public License(String nodeId){
         super(nodeId);
@@ -21,7 +21,7 @@ public class License extends AbstractAddedValue<LicenseData.LicenseEnum>{
     }
 
     @Override
-    public LicenseData.LicenseEnum getValue(){
+    public String getValue(){
         return value;
     }
 
@@ -31,8 +31,8 @@ public class License extends AbstractAddedValue<LicenseData.LicenseEnum>{
     }
 
     @Override
-    public LicenseData.LicenseEnum stringToValue(String string){
-	return LicenseData.LicenseEnum.valueOf(string);
+    public String stringToValue(String string){
+	return string;
     }
 
     @Override
@@ -41,8 +41,8 @@ public class License extends AbstractAddedValue<LicenseData.LicenseEnum>{
     }
 
     @Override
-    public String valueToString(LicenseData.LicenseEnum value){
-	return value.name();
+    public String valueToString(String value){
+	return value;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class License extends AbstractAddedValue<LicenseData.LicenseEnum>{
         this.value = this.stringToValue(value);
     }
 
-    protected static LicenseData.LicenseEnum getLicenseFromId(String nodeId) {
+    protected static String getLicenseFromId(String nodeId) {
 	return LicenseProceeding.getLicenseFromId(nodeId);
     }
 }

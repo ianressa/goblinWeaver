@@ -1,6 +1,8 @@
 package com.cifre.sap.su.goblinWeaver.utils;
 
 import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseData;
+import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseExpression;
+import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseMemory;
 import org.apache.commons.io.FileUtils;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
@@ -10,6 +12,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.Attributes;
 
 import java.io.*;
+import java.nio.file.*;
 import java.lang.StringBuilder;
 import java.util.logging.Logger;
 import java.util.logging.FileHandler;
@@ -18,6 +21,7 @@ import java.util.logging.SimpleFormatter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumMap;
+import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -43,7 +47,33 @@ public class LicenseProceeding {
 	}
     }
 
-    public static LicenseData.LicenseEnum getLicenseFromId(String nodeId) {
+    private static String memoryMatchByName(String name){
+	for (String key : LicenseMemory.currentMemory.keySet()){
+	    for (String altName : LicenseMemory.currentMemory.get(key).altNames){
+		if (name.equals(altName)){ return key; }
+	    }
+	}
+	return null;
+    }
+
+    private static String memoryMatchByURL(URL url){
+	for (String key : LicenseMemory.currentMemory.keySet()){
+	    for (URL altUrl : LicenseMemory.currentMemory.get(key).urls){
+		if (url.equals(altUrl)){ return key; }
+	    }
+	}
+	return null;
+    }
+
+    private static String memoryMatchByText(String licenseText){
+	for (String key : LicenseMemory.currentMemory.keySet()){
+	    if (licenseText.equals(LicenseMemory.currentMemory.get(key).licenseText)){ return key; }
+	}
+	return null;
+    }
+
+
+    public static String getLicenseFromId(String nodeId) {
 	String[] splitNodeId = nodeId.split(":");
 	if (splitNodeId.length != 3){
 	    return null;
@@ -51,10 +81,21 @@ public class LicenseProceeding {
 	String groupId = splitNodeId[0];
 	String artifactId = splitNodeId[1];
 	String version = splitNodeId[2];
-
-	File licenseFile = downloadLicenseData(groupId, artifactId, version);
-	if(licenseFile != null){
-	    return inferLicenseFromFile(licenseFile);
+	try {
+	    URL pomURL = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
+					    "/" + artifactId + "/" + version + "/" +
+					    artifactId + "-" + version + ".pom"));
+	    URL jarURL = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
+					    "/" + artifactId + "/" + version + "/" +
+					    artifactId + "-" + version + ".jar"));
+	    String tryPom = getMemoryFromPom(pomURL);
+	    if (tryPom == null){
+		String tryJar = getMemoryFromJar(jarURL);
+		return tryJar;
+	    }
+	    return tryPom;
+	} catch(MalformedURLException e){
+	    e.printStackTrace();
 	}
 	return null;
     }
@@ -75,26 +116,7 @@ public class LicenseProceeding {
 	    return null;
     }
 
-    private static File downloadLicenseFromText(URL url, File outfile){
-	System.out.println("Trying TXT url at " + url.toString());
-	try(InputStream in = url.openStream();){
-	    if(outfile.exists()){
-		outfile.delete();
-	    }
-	    FileOutputStream outStream = new FileOutputStream(outfile);
-	    for (int n = in.read(); n != -1; n = in.read()){
-		outStream.write(n);
-	    }
-	    outStream.close();
-	    in.close();
-	    return outfile;
-	} catch (IOException e){
-	    e.printStackTrace();
-	    return null;
-	}
-    }
-
-    private static File downloadLicenseFromJar(URL url, File outfile){
+    private static String downloadLicenseFromJar(URL url){
 	System.out.println("Trying JAR URL at " + url.toString());
 	try(InputStream in = url.openStream();
 	    JarInputStream jarIn = new JarInputStream(in)){
@@ -102,16 +124,13 @@ public class LicenseProceeding {
 	    while ((je = jarIn.getNextJarEntry()) != null){
 		if (je.getName().endsWith("LICENSE") || je.getName().endsWith("LICENSE.txt")) {
 		    System.out.println("Found LICENSE in archive at " + je.getName());
-		    if(outfile.exists()) {
-			outfile.delete();
-		    }
-		    FileOutputStream outStream = new FileOutputStream(outfile);
+		    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 		    for (int n = jarIn.read(); n != -1; n = jarIn.read()) {
 			outStream.write(n);
 		    }
 		    outStream.close();
 		    jarIn.closeEntry();
-		    return outfile;
+		    return outStream.toString();
 		}
 	    }
 	    System.out.println("No error, but could not find LICENSE in jar");
@@ -123,7 +142,13 @@ public class LicenseProceeding {
 	}
     }
 
-    private static File downloadLicenseFromPom(URL url, File outfile){
+    private static String getMemoryFromJar(URL url){
+	String jarLicense = downloadLicenseFromJar(url);
+	if (jarLicense == null){ return null; }
+	return memoryMatchByText(jarLicense);
+    }
+
+    private static String getMemoryFromPom(URL url){
 	System.out.println("Trying POM URL at " + url.toString());
 	try(InputStream in = url.openStream();){
 	    try{
@@ -139,11 +164,13 @@ public class LicenseProceeding {
 				     "\t" +
 				     ((licenseHandler.licenseURL != null) ? "(" + licenseHandler.licenseURL + ")" : "(No_License_URL)"));
 		logger.info(logText);
-		// This is a bad way to do this. Links to licenses almost never lead directly to pure license text.
-		//if (licenseHandler.licenseURL != null){
-		//    return downloadLicenseFromText(licenseHandler.licenseURL, outfile);
-		//}
-		return null;
+
+		String expTry = memoryMatchByName(licenseHandler.licenseName);
+		if (expTry != null){
+		    return expTry;
+		} else {
+		    return memoryMatchByURL(licenseHandler.licenseURL);
+		}
 	    } catch (SAXException e){
 		e.printStackTrace();
 		return null;
@@ -202,30 +229,5 @@ public class LicenseProceeding {
 		stringBuilder = null;
 	    }
 	}
-    }
-
-
-    private static File downloadLicenseData(String groupId, String artifactId, String version){
-	System.out.println("Downloading license data for " + groupId + ":" + artifactId + ":" + version);
-	File rootDir = new File(ROOT_PATH);
-	File groupDir = new File(DATA_PATH + File.separator + groupId);
-	File artifactDir = new File(groupDir + File.separator + artifactId);
-	File versionDir = new File(artifactDir + File.separator + version);
-	File outfile = new File(versionDir + File.separator + "LICENSE");
-	
-	if (rootDir.exists()){
-	    rootDir.delete();
-	}
-	versionDir.mkdirs();
-	try {
-	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
-					 "/" + artifactId + "/" + version + "/" +
-					 artifactId + "-" + version + ".pom"));
-	    File pomLicense = downloadLicenseFromPom(url, outfile);
-	    if (pomLicense != null){ return pomLicense; }
-	} catch (MalformedURLException e){
-	    e.printStackTrace();
-	}
-	return null;
     }
 }
