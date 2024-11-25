@@ -4,9 +4,40 @@ import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class LicenseMemory {
-    public static HashMap<String, LicenseExpression> currentMemory = null;
+    private static HashMap<String, LicenseExpression> currentMemory = null;
+
+    public static void appendToExpression(String key, LicenseExpression expression){
+	LicenseExpression currentExpression = currentMemory.get(key);
+	currentExpression.altNames.addAll(expression.altNames);
+	currentExpression.urls.addAll(expression.urls);
+	if ((currentExpression.licenseText == null || currentExpression.licenseText.trim().isEmpty()) &&
+	    expression.licenseText != null && !expression.licenseText.trim().isEmpty()){
+	    currentExpression.licenseText = expression.licenseText;
+	}
+	currentMemory.put(key, currentExpression);
+    }
+
+    public static String addNewExpression(LicenseExpression expression){
+	String newKey = UUID.randomUUID().toString();
+	currentMemory.put(newKey, expression);
+	return newKey;
+    }
+
+    public static String findExpressionMatch(LicenseExpression expression){
+	for (String key : currentMemory.keySet()){
+	    LicenseExpression gotExp = currentMemory.get(key);
+	    gotExp.altNames.retainAll(expression.altNames);
+	    gotExp.urls.retainAll(expression.urls);
+	    if((!gotExp.altNames.isEmpty()) || (!gotExp.urls.isEmpty()) ||
+	       (gotExp.licenseText.equals(expression.licenseText))){
+		return key;
+	    }
+	}
+	return null;
+    }
 
     public static void initMemory(){
 	System.out.println("Reading current license data...");

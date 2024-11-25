@@ -1,6 +1,5 @@
 package com.cifre.sap.su.goblinWeaver.utils;
 
-import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseData;
 import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseExpression;
 import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseMemory;
 import org.apache.commons.io.FileUtils;
@@ -14,6 +13,7 @@ import org.xml.sax.Attributes;
 import java.io.*;
 import java.nio.file.*;
 import java.lang.StringBuilder;
+import java.util.HashSet;
 import java.util.logging.Logger;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
@@ -21,7 +21,6 @@ import java.util.logging.SimpleFormatter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EnumMap;
-import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -47,31 +46,6 @@ public class LicenseProceeding {
 	}
     }
 
-    private static String memoryMatchByName(String name){
-	for (String key : LicenseMemory.currentMemory.keySet()){
-	    for (String altName : LicenseMemory.currentMemory.get(key).altNames){
-		if (name.equals(altName)){ return key; }
-	    }
-	}
-	return null;
-    }
-
-    private static String memoryMatchByURL(URL url){
-	for (String key : LicenseMemory.currentMemory.keySet()){
-	    for (URL altUrl : LicenseMemory.currentMemory.get(key).urls){
-		if (url.equals(altUrl)){ return key; }
-	    }
-	}
-	return null;
-    }
-
-    private static String memoryMatchByText(String licenseText){
-	for (String key : LicenseMemory.currentMemory.keySet()){
-	    if (licenseText.equals(LicenseMemory.currentMemory.get(key).licenseText)){ return key; }
-	}
-	return null;
-    }
-
 
     public static String getLicenseFromId(String nodeId) {
 	String[] splitNodeId = nodeId.split(":");
@@ -88,32 +62,20 @@ public class LicenseProceeding {
 	    URL jarURL = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					    "/" + artifactId + "/" + version + "/" +
 					    artifactId + "-" + version + ".jar"));
-	    String tryPom = getMemoryFromPom(pomURL);
-	    if (tryPom == null){
-		String tryJar = getMemoryFromJar(jarURL);
-		return tryJar;
+
+	    NameURLTuple nameURL = getInfoFromPom(pomURL);
+	    String licenseText = downloadLicenseFromJar(jarURL);
+
+	    LicenseExpression inferredExpression = new LicenseExpression((String)nameURL.name, (URL)nameURL.url, licenseText);
+	    String expressionMatchKey = LicenseMemory.findExpressionMatch(inferredExpression);
+	    if (expressionMatchKey == null){
+		return LicenseMemory.addNewExpression(inferredExpression);
 	    }
-	    return tryPom;
+	    return expressionMatchKey;
 	} catch(MalformedURLException e){
 	    e.printStackTrace();
 	}
 	return null;
-    }
-
-    private static LicenseData.LicenseEnum inferLicenseFromFile(File licenseFile) {
-	try {
-	    for (EnumMap.Entry<LicenseData.LicenseEnum, File> entry : LicenseData.LicenseFileMap.entrySet()){
-		System.out.println("Checking if " + licenseFile.getName() + " is equivalent to " + entry.getValue().getName());
-		if (FileUtils.contentEquals(licenseFile, entry.getValue())) {
-		    return entry.getKey();
-		}
-	    }
-	} catch (IOException e){
-	    e.printStackTrace();
-	    return null;
-	}
-	    System.out.println("No error, but no existing license matched " + licenseFile.getName());
-	    return null;
     }
 
     private static String downloadLicenseFromJar(URL url){
@@ -142,13 +104,7 @@ public class LicenseProceeding {
 	}
     }
 
-    private static String getMemoryFromJar(URL url){
-	String jarLicense = downloadLicenseFromJar(url);
-	if (jarLicense == null){ return null; }
-	return memoryMatchByText(jarLicense);
-    }
-
-    private static String getMemoryFromPom(URL url){
+    private static NameURLTuple getInfoFromPom(URL url){
 	System.out.println("Trying POM URL at " + url.toString());
 	try(InputStream in = url.openStream();){
 	    try{
@@ -165,12 +121,7 @@ public class LicenseProceeding {
 				     ((licenseHandler.licenseURL != null) ? "(" + licenseHandler.licenseURL + ")" : "(No_License_URL)"));
 		logger.info(logText);
 
-		String expTry = memoryMatchByName(licenseHandler.licenseName);
-		if (expTry != null){
-		    return expTry;
-		} else {
-		    return memoryMatchByURL(licenseHandler.licenseURL);
-		}
+		return new NameURLTuple(licenseHandler.licenseName, licenseHandler.licenseURL);
 	    } catch (SAXException e){
 		e.printStackTrace();
 		return null;
@@ -228,6 +179,15 @@ public class LicenseProceeding {
 		licenseName = stringBuilder.toString();
 		stringBuilder = null;
 	    }
+	}
+    }
+
+    private static class NameURLTuple<String, URL>{
+	public final String name;
+	public final URL url;
+	public NameURLTuple(String name, URL url){
+	    this.name = name;
+	    this.url = url;
 	}
     }
 }
