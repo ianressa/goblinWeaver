@@ -65,7 +65,7 @@ public class LicenseProceeding {
 	    String licenseText = downloadLicenseFromJar(jarURL);
 
 	    LicenseExpression inferredExpression = new LicenseExpression(nameURL.name, nameURL.url, licenseText);
-	    logger.info("Inferred expression with Name " + nameURL.name + " - URL " + nameURL.url.toString() + " - And license text " + (licenseText.isEmpty() ? "not present" : "present"));
+	    logger.info("Inferred expression with Name " + nameURL.name + " - URL " + nameURL.url.toString() + " - And license text " + ((licenseText == null || licenseText.isEmpty()) ? "not present" : "present"));
 	    String expressionMatchKey = LicenseMemory.findExpressionMatch(inferredExpression);
 	    if (expressionMatchKey == null){
 		return LicenseMemory.addNewExpression(inferredExpression);
