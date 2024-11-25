@@ -61,10 +61,11 @@ public class LicenseProceeding {
 					    "/" + artifactId + "/" + version + "/" +
 					    artifactId + "-" + version + ".jar"));
 
-	    NameURLTuple nameURL = getInfoFromPom(pomURL);
+	    NameURLTuple<String,URL> nameURL = getInfoFromPom(pomURL);
 	    String licenseText = downloadLicenseFromJar(jarURL);
 
-	    LicenseExpression inferredExpression = new LicenseExpression((String)nameURL.name, (URL)nameURL.url, licenseText);
+	    LicenseExpression inferredExpression = new LicenseExpression(nameURL.name, nameURL.url, licenseText);
+	    logger.info("Inferred expression with Name " + nameURL.name + " - URL " + nameURL.url.toString() + " - And license text " + (licenseText.isEmpty() ? "not present" : "present"));
 	    String expressionMatchKey = LicenseMemory.findExpressionMatch(inferredExpression);
 	    if (expressionMatchKey == null){
 		return LicenseMemory.addNewExpression(inferredExpression);
