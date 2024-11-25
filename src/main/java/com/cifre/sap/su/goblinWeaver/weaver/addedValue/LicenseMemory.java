@@ -59,7 +59,11 @@ public class LicenseMemory {
 
     private static void readMemoryFromFile(){
 	try{
-	    FileInputStream in = new FileInputStream(ConstantProperties.licenseMemoryPath);
+	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
+	    if (!licenseMemoryFile.exists()){
+		licenseMemoryFile.createNewFile();
+	    }
+	    FileInputStream in = new FileInputStream(licenseMemoryFile);
 	    ObjectInputStream oin = new ObjectInputStream(in);
 	    // Fixme, bad way to do this
 	    HashMap<String, LicenseExpression> obj = (HashMap<String, LicenseExpression>) oin.readObject();
@@ -73,7 +77,11 @@ public class LicenseMemory {
 
     private static void writeMemoryToFile(){
 	try{
-	    FileOutputStream out = new FileOutputStream(ConstantProperties.licenseMemoryPath);
+	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
+	    if (!licenseMemoryFile.exists()){
+		licenseMemoryFile.createNewFile();
+	    }
+	    FileOutputStream out = new FileOutputStream(licenseMemoryFile);
 	    ObjectOutputStream oout = new ObjectOutputStream(out);
 	    oout.writeObject(currentMemory);
 	    oout.flush();
