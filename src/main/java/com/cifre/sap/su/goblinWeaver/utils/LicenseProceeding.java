@@ -1,6 +1,7 @@
 package com.cifre.sap.su.goblinWeaver.utils;
 
 import com.cifre.sap.su.goblinWeaver.weaver.addedValue.LicenseData;
+import com.cifre.sap.su.goblinWeaver.utils.MvnParser;
 import org.apache.commons.io.FileUtils;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
@@ -204,6 +205,10 @@ public class LicenseProceeding {
 	}
     }
 
+    private static void logMvnLicense(String groupId, String artifactId, String version){
+	logger.info(MvnParser.getLicenseFromMvn(groupId, artifactId, version));
+	return;
+    }
 
     private static File downloadLicenseData(String groupId, String artifactId, String version){
 	System.out.println("Downloading license data for " + groupId + ":" + artifactId + ":" + version);
@@ -217,7 +222,8 @@ public class LicenseProceeding {
 	    rootDir.delete();
 	}
 	versionDir.mkdirs();
-	try {
+	logMvnLicense(groupId, artifactId, version);
+	/* try {
 	    URL url = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					 "/" + artifactId + "/" + version + "/" +
 					 artifactId + "-" + version + ".pom"));
@@ -225,7 +231,7 @@ public class LicenseProceeding {
 	    if (pomLicense != null){ return pomLicense; }
 	} catch (MalformedURLException e){
 	    e.printStackTrace();
-	}
+	}*/
 	return null;
     }
 }
