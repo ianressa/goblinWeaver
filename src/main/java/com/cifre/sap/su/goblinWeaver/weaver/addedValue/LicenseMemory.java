@@ -1,6 +1,9 @@
 package com.cifre.sap.su.goblinWeaver.weaver.addedValue;
 
 import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
+import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.IOUtils;
+import com.google.gson.Gson;
 
 import java.io.*;
 import java.util.HashMap;
@@ -58,24 +61,23 @@ public class LicenseMemory {
     }
 
     private static void readMemoryFromFile(){
+	Gson gs = new Gson();
 	try{
 	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
 	    if (!licenseMemoryFile.exists()){
 		licenseMemoryFile.createNewFile();
 	    }
 	    FileInputStream in = new FileInputStream(licenseMemoryFile);
-	    ObjectInputStream oin = new ObjectInputStream(in);
-	    // Fixme, bad way to do this
-	    HashMap<String, LicenseExpression> obj = (HashMap<String, LicenseExpression>) oin.readObject();
-	    oin.close();
+	    String json = IOUtils.toString(in, StandardCharsets.UTF_8);
+	    in.close();
+	    currentMemory = gs.fromJson(json, currentMemory.getClass());
 	} catch (IOException e){
-	    e.printStackTrace();
-	} catch (ClassNotFoundException e){
 	    e.printStackTrace();
 	}
     }
 
     private static void writeMemoryToFile(){
+	Gson gs = new Gson();
 	try{
 	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
 	    if (!licenseMemoryFile.exists()){
@@ -83,7 +85,7 @@ public class LicenseMemory {
 	    }
 	    FileOutputStream out = new FileOutputStream(licenseMemoryFile);
 	    ObjectOutputStream oout = new ObjectOutputStream(out);
-	    oout.writeObject(currentMemory);
+	    oout.writeObject(gs.toJson(currentMemory));
 	    oout.flush();
 	    oout.close();
 	} catch (IOException e){
