@@ -4,6 +4,7 @@ import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.util.HashMap;
@@ -70,7 +71,8 @@ public class LicenseMemory {
 	    FileInputStream in = new FileInputStream(licenseMemoryFile);
 	    String json = IOUtils.toString(in, StandardCharsets.UTF_8);
 	    in.close();
-	    currentMemory = gs.fromJson(json, currentMemory.getClass());
+	    currentMemory = gs.fromJson(json,
+					new TypeToken<HashMap<String, LicenseExpression>>() {}.getType());
 	} catch (IOException e){
 	    e.printStackTrace();
 	}
