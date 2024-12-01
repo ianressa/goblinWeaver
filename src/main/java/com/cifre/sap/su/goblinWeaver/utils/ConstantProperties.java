@@ -1,5 +1,7 @@
 package com.cifre.sap.su.goblinWeaver.utils;
 
+import java.io.File;
+
 public class ConstantProperties {
 
     // Paths
@@ -7,4 +9,9 @@ public class ConstantProperties {
     public static final String licenseMemoryPath = dataFolderPath + "/licenseMemory.txt";
     public static final String osvDataFolderPath = dataFolderPath + "/osvData";
     public static final String databaseStatusFile = dataFolderPath+"/databaseStatus.txt";
+
+    public static void initDataFolder() {
+	File f = new File(dataFolderPath);
+	f.mkdirs();
+    }
 }
