@@ -4,6 +4,7 @@ import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
@@ -73,7 +74,7 @@ public class LicenseMemory {
 	    in.close();
 	    currentMemory = gs.fromJson(json,
 					new TypeToken<HashMap<String, LicenseExpression>>() {}.getType());
-	} catch (IOException e){
+	} catch (IOException | JsonParseException e) {
 	    e.printStackTrace();
 	}
     }
