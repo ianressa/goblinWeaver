@@ -13,6 +13,7 @@ import java.util.UUID;
 
 public class LicenseMemory {
     private static HashMap<String, LicenseExpression> currentMemory = null;
+    private static String emptyItemId = "0";
 
     public static void appendToExpression(String key, LicenseExpression expression){
 	LicenseExpression currentExpression = new LicenseExpression(currentMemory.get(key));
@@ -31,9 +32,16 @@ public class LicenseMemory {
 	return newKey;
     }
 
+    private static void addNewExpression(String id, LicenseExpression expression){
+	currentMemory.put(id, expression);
+    }
+
     public static String findExpressionMatch(LicenseExpression expression){
 	if (currentMemory == null || currentMemory.size() == 0) {
 	    return null;
+	}
+	if (expression.isEmpty()) {
+	    return emptyItemId;
 	}
 	for (String key : currentMemory.keySet()){
 	    LicenseExpression gotExp = new LicenseExpression(currentMemory.get(key));
@@ -53,6 +61,7 @@ public class LicenseMemory {
 	if (currentMemory == null){
 	    System.out.println("Couldn't read data. Starting fresh...");
 	    currentMemory = new HashMap<String, LicenseExpression>();
+	    addNewExpression(emptyItemId, LicenseExpression.Empty());
 	    return;
 	}
 	System.out.println("Done. Read " + String.valueOf(currentMemory.size()) + " elements.");

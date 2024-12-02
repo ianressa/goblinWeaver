@@ -49,6 +49,17 @@ public class LicenseExpression implements Serializable {
 	this.licenseText = normalizeText(exp.licenseText);
     }
 
+    public boolean isEmpty(){
+	return
+	    (this.altNames == null || this.altNames.isEmpty()) &&
+	    (this.urls == null || this.urls.isEmpty()) &&
+	    (this.licenseText == null || this.licenseText.isEmpty());
+    }
+
+    public static LicenseExpression Empty(){
+	return new LicenseExpression(new HashSet<String>(), new HashSet<URL>(), new String());
+    }
+
     private String normalizeText(String licenseText) {
 	return StringUtils.trim(licenseText.replaceAll("\\s+", " "));
     }
