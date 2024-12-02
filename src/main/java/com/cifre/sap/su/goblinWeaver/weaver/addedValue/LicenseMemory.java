@@ -4,6 +4,7 @@ import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
@@ -96,17 +97,16 @@ public class LicenseMemory {
     }
 
     private static void writeMemoryToFile(){
-	Gson gs = new Gson();
+	Gson gs = new GsonBuilder().
+	    enableComplexMapKeySerialization()
+	    .setPrettyPrinting()
+	    .create();
 	try{
 	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
 	    if (!licenseMemoryFile.exists()){
 		licenseMemoryFile.createNewFile();
 	    }
-	    FileOutputStream out = new FileOutputStream(licenseMemoryFile);
-	    ObjectOutputStream oout = new ObjectOutputStream(out);
-	    oout.writeObject(gs.toJson(currentMemory));
-	    oout.flush();
-	    oout.close();
+	    gs.toJson(currentMemory, new FileWriter(licenseMemoryFile));
 	} catch (IOException e){
 	    e.printStackTrace();
 	}
