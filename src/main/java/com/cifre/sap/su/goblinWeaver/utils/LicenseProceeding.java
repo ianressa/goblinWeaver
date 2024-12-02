@@ -26,7 +26,7 @@ import java.util.jar.JarInputStream;
 
 
 public class LicenseProceeding {
-    private static final String REPOSITORY_URL = "https://search.maven.org/remotecontent?filepath=";
+    private static final String REPOSITORY_URL = "https://repo1.maven.org/maven2";
 
     private static Logger logger = Logger.getLogger("licenseLog");
     private static SimpleFormatter formatter = new SimpleFormatter();
@@ -54,10 +54,10 @@ public class LicenseProceeding {
 	String artifactId = splitNodeId[1];
 	String version = splitNodeId[2];
 	try {
-	    URL pomURL = new URL(new String(REPOSITORY_URL + groupId.replace(".", "/") +
+	    URL pomURL = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					    "/" + artifactId + "/" + version + "/" +
 					    artifactId + "-" + version + ".pom"));
-	    URL jarURL = new URL(new String(REPOSITORY_URL + groupId.replace(".", "/") +
+	    URL jarURL = new URL(new String(REPOSITORY_URL + "/" + groupId.replace(".", "/") +
 					    "/" + artifactId + "/" + version + "/" +
 					    artifactId + "-" + version + ".jar"));
 
