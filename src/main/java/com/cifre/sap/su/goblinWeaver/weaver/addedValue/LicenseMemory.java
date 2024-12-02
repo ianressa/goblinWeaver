@@ -44,6 +44,9 @@ public class LicenseMemory {
 	    return emptyItemId;
 	}
 	for (String key : currentMemory.keySet()){
+	    if (key.equals(emptyItemId)) {
+		continue;
+	    }
 	    LicenseExpression gotExp = new LicenseExpression(currentMemory.get(key));
 	    gotExp.altNames.retainAll(expression.altNames);
 	    gotExp.urls.retainAll(expression.urls);
