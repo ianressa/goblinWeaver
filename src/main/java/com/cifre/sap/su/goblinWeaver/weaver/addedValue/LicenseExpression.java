@@ -5,6 +5,7 @@ import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
 import java.io.*;
 import java.net.URL;
 import java.util.HashSet;
+import org.apache.commons.lang3.StringUtils;
 
 public class LicenseExpression implements Serializable {
     private static final long serialVersionUID = 10L;
@@ -26,7 +27,7 @@ public class LicenseExpression implements Serializable {
 	if (licenseText == null){
 	    this.licenseText = "";
 	} else{
-	this.licenseText = licenseText;
+	    this.licenseText = normalizeText(licenseText);
 	}
     }
 
@@ -38,13 +39,17 @@ public class LicenseExpression implements Serializable {
 	if (licenseText == null){
 	    this.licenseText = "";
 	} else{
-	this.licenseText = licenseText;
+	    this.licenseText = normalizeText(licenseText);
 	}
     }
 
     public LicenseExpression(LicenseExpression exp){
 	this.altNames = exp.altNames;
 	this.urls = exp.urls;
-	this.licenseText = exp.licenseText;
+	this.licenseText = normalizeText(exp.licenseText);
+    }
+
+    private String normalizeText(String licenseText) {
+	return StringUtils.trim(licenseText.replaceAll("\\s+", " "));
     }
 }
