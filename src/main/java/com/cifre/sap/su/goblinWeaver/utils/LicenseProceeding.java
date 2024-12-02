@@ -68,7 +68,7 @@ public class LicenseProceeding {
 	    logger.info("Inferred expression with Name " +
 			((nameURL.name == null || nameURL.name.isEmpty()) ? "<No Name>" : nameURL.name) +
 			" - URL " +
-			((nameURL.url.toString() == null || nameURL.url.toString().isEmpty()) ? "<No URL>" : nameURL.url.toString()) +
+			((nameURL.url == null || nameURL.url.toString().isEmpty()) ? "<No URL>" : nameURL.url.toString()) +
 			" - And license text " +
 			((licenseText == null || licenseText.isEmpty()) ? "not present" : "present"));
 	    String expressionMatchKey = LicenseMemory.findExpressionMatch(inferredExpression);
