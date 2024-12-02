@@ -32,6 +32,9 @@ public class LicenseMemory {
     }
 
     public static String findExpressionMatch(LicenseExpression expression){
+	if (currentMemory == null || currentMemory.size() == 0) {
+	    return null;
+	}
 	for (String key : currentMemory.keySet()){
 	    LicenseExpression gotExp = currentMemory.get(key);
 	    gotExp.altNames.retainAll(expression.altNames);
