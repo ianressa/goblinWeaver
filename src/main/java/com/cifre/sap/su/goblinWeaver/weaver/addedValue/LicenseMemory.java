@@ -15,7 +15,7 @@ public class LicenseMemory {
     private static HashMap<String, LicenseExpression> currentMemory = null;
 
     public static void appendToExpression(String key, LicenseExpression expression){
-	LicenseExpression currentExpression = currentMemory.get(key);
+	LicenseExpression currentExpression = new LicenseExpression(currentMemory.get(key));
 	currentExpression.altNames.addAll(expression.altNames);
 	currentExpression.urls.addAll(expression.urls);
 	if ((currentExpression.licenseText == null || currentExpression.licenseText.trim().isEmpty()) &&
