@@ -77,7 +77,9 @@ public class LicenseProceeding {
 			((licenseText == null || licenseText.isEmpty()) ? "not present" : "present"));
 	    String expressionMatchKey = LicenseMemory.findExpressionMatch(inferredExpression);
 	    if (expressionMatchKey == null){
-		return LicenseMemory.addNewExpression(inferredExpression);
+		String newKey = LicenseMemory.addNewExpression(inferredExpression);
+		logger.info("Created new key " + newKey);
+		return newKey;
 	    }
 	    logger.info("Matched existing expression with key " + expressionMatchKey);
 	    return expressionMatchKey;
