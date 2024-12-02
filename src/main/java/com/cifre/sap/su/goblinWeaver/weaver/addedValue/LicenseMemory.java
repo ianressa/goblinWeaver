@@ -36,7 +36,7 @@ public class LicenseMemory {
 	    return null;
 	}
 	for (String key : currentMemory.keySet()){
-	    LicenseExpression gotExp = currentMemory.get(key);
+	    LicenseExpression gotExp = new LicenseExpression(currentMemory.get(key));
 	    gotExp.altNames.retainAll(expression.altNames);
 	    gotExp.urls.retainAll(expression.urls);
 	    if((!gotExp.altNames.isEmpty()) || (!gotExp.urls.isEmpty()) ||

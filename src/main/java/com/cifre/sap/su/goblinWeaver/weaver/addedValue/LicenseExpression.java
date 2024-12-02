@@ -41,4 +41,10 @@ public class LicenseExpression implements Serializable {
 	this.licenseText = licenseText;
 	}
     }
+
+    public LicenseExpression(LicenseExpression exp){
+	this.altNames = exp.altNames;
+	this.urls = exp.urls;
+	this.licenseText = exp.licenseText;
+    }
 }

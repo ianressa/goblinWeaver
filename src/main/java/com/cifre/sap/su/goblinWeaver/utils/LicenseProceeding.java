@@ -75,6 +75,7 @@ public class LicenseProceeding {
 	    if (expressionMatchKey == null){
 		return LicenseMemory.addNewExpression(inferredExpression);
 	    }
+	    logger.info("Matched existing expression with key " + expressionMatchKey);
 	    return expressionMatchKey;
 	} catch(MalformedURLException e){
 	    e.printStackTrace();
