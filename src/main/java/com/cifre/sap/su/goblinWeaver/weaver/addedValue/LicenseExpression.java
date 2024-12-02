@@ -63,4 +63,10 @@ public class LicenseExpression implements Serializable {
     private String normalizeText(String licenseText) {
 	return StringUtils.trim(licenseText.replaceAll("\\s+", " "));
     }
+
+
+    @Override
+    public String toString(){
+	return this.altNames.toString() + "\n" + this.urls.toString() + "\n" + this.licenseText.toString();
+    }
 }
