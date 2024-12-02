@@ -28,6 +28,7 @@ public class LicenseMemory {
 
     public static String addNewExpression(LicenseExpression expression){
 	String newKey = UUID.randomUUID().toString();
+	System.out.println("Key: " + newKey + "\nValue: " + expression.toString());
 	currentMemory.put(newKey, expression);
 	return newKey;
     }
