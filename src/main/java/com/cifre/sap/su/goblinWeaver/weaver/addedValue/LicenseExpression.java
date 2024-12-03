@@ -1,6 +1,6 @@
 package com.cifre.sap.su.goblinWeaver.weaver.addedValue;
 
-import com.cifre.sap.su.goblinWeaver.utils.ConstantProperties;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 import java.io.*;
 import java.net.URL;
@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class LicenseExpression implements Serializable {
     private static final long serialVersionUID = 10L;
+    private static final int FUZZY_THRESHOLD = 95;
     public HashSet<String> altNames;
     public HashSet<URL> urls;
     public String licenseText;
@@ -61,6 +62,27 @@ public class LicenseExpression implements Serializable {
 	    (this.altNames == null || this.altNames.isEmpty()) &&
 	    (this.urls == null || this.urls.isEmpty()) &&
 	    (this.licenseText == null || this.licenseText.isEmpty());
+    }
+
+    public boolean fuzzyMatches(LicenseExpression expb){
+	for (String namea : this.altNames){
+	    for (String nameb : expb.altNames){
+		if (FuzzySearch.weightedRatio(namea, nameb) >= FUZZY_THRESHOLD){
+		    return true;
+		}
+	    }
+	}
+	for (URL urla : this.urls){
+	    for (URL urlb : expb.urls){
+		if (urla.toString().equals(urlb.toString())){
+		    return true;
+		}
+	    }
+	}
+	if (FuzzySearch.weightedRatio(this.licenseText, expb.licenseText) >= FUZZY_THRESHOLD){
+	    return true;
+	}
+	return false;
     }
 
     public static LicenseExpression Empty(){

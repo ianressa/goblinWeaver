@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class LicenseMemory {
+    private static int FUZZY_THRESHOLD = 80;
     private static HashMap<String, LicenseExpression> currentMemory = null;
     private static String emptyItemId = "0";
 
@@ -52,11 +53,8 @@ public class LicenseMemory {
 	    if (key.equals(emptyItemId)) {
 		continue;
 	    }
-	    gotExp.altNames.retainAll(expression.altNames);
-	    gotExp.urls.retainAll(expression.urls);
-	    if((!gotExp.altNames.isEmpty()) || (!gotExp.urls.isEmpty()) ||
-	       (gotExp.licenseText.equals(expression.licenseText))){
 	    LicenseExpression gotExp = currentMemory.get(key).deepCopy();
+	    if (gotExp.fuzzyMatches(expression)){
 		return key;
 	    }
 	}
@@ -109,7 +107,10 @@ public class LicenseMemory {
 	    if (!licenseMemoryFile.exists()){
 		licenseMemoryFile.createNewFile();
 	    }
-	    gs.toJson(currentMemory, new FileWriter(licenseMemoryFile));
+	    FileWriter fw = new FileWriter(licenseMemoryFile);
+	    gs.toJson(currentMemory, fw);
+	    fw.close();
+	    return;
 	} catch (IOException e){
 	    e.printStackTrace();
 	}
