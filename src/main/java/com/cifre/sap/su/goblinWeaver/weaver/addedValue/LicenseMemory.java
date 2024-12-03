@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class LicenseMemory {
-    private static int FUZZY_THRESHOLD = 80;
     private static HashMap<String, LicenseExpression> currentMemory = null;
     private static String emptyItemId = "0";
 
