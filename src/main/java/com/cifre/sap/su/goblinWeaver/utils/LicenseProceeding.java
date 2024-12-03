@@ -66,15 +66,9 @@ public class LicenseProceeding {
 
 	    LicenseExpression inferredExpression = new LicenseExpression(nameURL.name, nameURL.url, licenseText);
 	    logger.info("Created expression with: \n" +
-			inferredExpression.altNames.toString() + ",\n" +
-			inferredExpression.urls.toString() + ",\n" +
+			inferredExpression.getNames().toString() + ",\n" +
+			inferredExpression.getURLs().toString() + ",\n" +
 			(inferredExpression.isEmpty() ? "Empty" : "Not Empty"));
-	    logger.info("Inferred expression with Name " +
-			((nameURL.name == null || nameURL.name.isEmpty()) ? "<No Name>" : nameURL.name) +
-			" - URL " +
-			((nameURL.url == null || nameURL.url.toString().isEmpty()) ? "<No URL>" : nameURL.url.toString()) +
-			" - And license text " +
-			((licenseText == null || licenseText.isEmpty()) ? "not present" : "present"));
 	    String expressionMatchKey = LicenseMemory.findExpressionMatch(inferredExpression);
 	    if (expressionMatchKey == null){
 		String newKey = LicenseMemory.addNewExpression(inferredExpression);

@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.*;
 import java.util.HashMap;
 import java.util.UUID;
+import java.net.URL;
 
 public class LicenseMemory {
     private static HashMap<String, LicenseExpression> currentMemory = null;
@@ -21,15 +22,19 @@ public class LicenseMemory {
 	    return;
 	}
 	LicenseExpression currentExpression = currentMemory.get(key).deepCopy();
-	if (!currentExpression.altNames.isEmpty() && currentExpression.altNames != null) {
-	    currentExpression.altNames.addAll(expression.altNames);
+	if (expression.getNames() != null) {
+	    for (String name : expression.getNames()) {
+		currentExpression.addName(name);
+	    }
 	}
-	if (!currentExpression.urls.isEmpty() && currentExpression.urls != null) {
-	    currentExpression.urls.addAll(expression.urls);
+	if (expression.getURLs() != null) {
+	    for (URL url : expression.getURLs()){
+		currentExpression.addURL(url);
+	    }
 	}
-	if ((currentExpression.licenseText == null || currentExpression.licenseText.trim().isEmpty()) &&
-	    expression.licenseText != null && !expression.licenseText.trim().isEmpty()){
-	    currentExpression.licenseText = expression.licenseText;
+	if ((currentExpression.getLicenseText() == null || currentExpression.getLicenseText().isEmpty()) &&
+	    expression.getLicenseText() != null && !expression.getLicenseText().isEmpty()){
+	    currentExpression.setLicenseText(expression.getLicenseText());
 	}
 	currentMemory.put(key, currentExpression);
     }

@@ -10,38 +10,34 @@ import org.apache.commons.lang3.StringUtils;
 public class LicenseExpression implements Serializable {
     private static final long serialVersionUID = 10L;
     private static final int FUZZY_THRESHOLD = 95;
-    public HashSet<String> altNames;
-    public HashSet<URL> urls;
-    public String licenseText;
+    private HashSet<String> altNames;
+    private HashSet<URL> urls;
+    private String licenseText;
 
     public LicenseExpression(HashSet<String> altNames, HashSet<URL> urls, String licenseText){
+	this.altNames = new HashSet<String>();
+	this.urls = new HashSet<URL>();
+	this.licenseText = "";
 	if (altNames != null){
-	    this.altNames = altNames;
-	} else{
-	    this.altNames = new HashSet<String>();
+	    for (String name : altNames) {
+		addName(name);
+	    }
 	}
 	if (urls != null){
-	    this.urls = urls;
-	} else{
-	    this.urls = new HashSet<URL>();
+	    for (URL url : urls) {
+		addURL(url);
+	    }
 	}
-	if (licenseText == null){
-	    this.licenseText = "";
-	} else{
-	    this.licenseText = normalizeText(licenseText);
-	}
+	setLicenseText(licenseText);
     }
 
     public LicenseExpression(String name, URL url, String licenseText){
 	this.altNames = new HashSet<String>();
 	this.urls = new HashSet<URL>();
-	if (name != null){ this.altNames.add(name); }
-	if (url != null){ this.urls.add(url); }
-	if (licenseText == null){
-	    this.licenseText = "";
-	} else{
-	    this.licenseText = normalizeText(licenseText);
-	}
+	this.licenseText = "";
+	if (name != null){ addName(name); }
+	if (url != null){ addURL(url); }
+	setLicenseText(licenseText);
     }
 
     public LicenseExpression deepCopy(){
@@ -101,6 +97,39 @@ public class LicenseExpression implements Serializable {
 	return StringUtils.trim(licenseText.replaceAll("\\s+", " "));
     }
 
+    public boolean addName(String name) {
+	if (name != null) {
+	    return this.altNames.add(name);
+	}
+	return false;
+    }
+
+    public HashSet<String> getNames() {
+	return altNames;
+    }
+
+    public boolean addURL(URL url) {
+	if (url != null) {
+	    return this.urls.add(url);
+	}
+	return false;
+    }
+
+    public HashSet<URL> getURLs() {
+	return urls;
+    }
+
+    public boolean setLicenseText(String licenseText) {
+	if (licenseText != null) {
+	    this.licenseText = normalizeText(licenseText);
+	    return true;
+	}
+	return false;
+    }
+
+    public String getLicenseText() {
+	return licenseText;
+    }
 
     @Override
     public String toString(){
