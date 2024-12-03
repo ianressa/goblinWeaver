@@ -21,8 +21,12 @@ public class LicenseMemory {
 	    return;
 	}
 	LicenseExpression currentExpression = currentMemory.get(key).deepCopy();
-	currentExpression.altNames.addAll(expression.altNames);
-	currentExpression.urls.addAll(expression.urls);
+	if (!currentExpression.altNames.isEmpty() && currentExpression.altNames != null) {
+	    currentExpression.altNames.addAll(expression.altNames);
+	}
+	if (!currentExpression.urls.isEmpty() && currentExpression.urls != null) {
+	    currentExpression.urls.addAll(expression.urls);
+	}
 	if ((currentExpression.licenseText == null || currentExpression.licenseText.trim().isEmpty()) &&
 	    expression.licenseText != null && !expression.licenseText.trim().isEmpty()){
 	    currentExpression.licenseText = expression.licenseText;
@@ -62,11 +66,15 @@ public class LicenseMemory {
 
     public static void initMemory(){
 	System.out.println("Reading current license data...");
-	readMemoryFromFile();
+	readMemoryFromFile(ConstantProperties.licenseMemoryPath);
 	if (currentMemory == null){
-	    System.out.println("Couldn't read data. Starting fresh...");
-	    currentMemory = new HashMap<String, LicenseExpression>();
-	    addNewExpression(emptyItemId, LicenseExpression.Empty());
+	    System.out.println("Couldn't read data. Starting fresh from seed file...");
+	    readMemoryFromFile(ConstantProperties.licenseSeedPath);
+	    if (currentMemory == null) {
+		System.out.println("Warning: Couldn't read from seed file. Starting with a blank set.");
+		currentMemory = new HashMap<String, LicenseExpression>();
+		addNewExpression(emptyItemId, LicenseExpression.Empty());
+	    }
 	    return;
 	}
 	System.out.println("Done. Read " + String.valueOf(currentMemory.size()) + " elements.");
@@ -75,14 +83,14 @@ public class LicenseMemory {
     public static void writeMemory(){
 	System.out.println("Saving current license data (" + String.valueOf(currentMemory.size()) + " elements)...");
 	if (currentMemory != null){
-	    writeMemoryToFile();
+	    writeMemoryToFile(ConstantProperties.licenseMemoryPath);
 	}
     }
 
-    private static void readMemoryFromFile(){
+    private static void readMemoryFromFile(String path){
 	Gson gs = new Gson();
 	try{
-	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
+	    File licenseMemoryFile = new File(path);
 	    if (!licenseMemoryFile.exists()){
 		licenseMemoryFile.createNewFile();
 	    }
@@ -96,13 +104,13 @@ public class LicenseMemory {
 	}
     }
 
-    private static void writeMemoryToFile(){
+    private static void writeMemoryToFile(String path){
 	Gson gs = new GsonBuilder().
 	    enableComplexMapKeySerialization()
 	    .setPrettyPrinting()
 	    .create();
 	try{
-	    File licenseMemoryFile = new File(ConstantProperties.licenseMemoryPath);
+	    File licenseMemoryFile = new File(path);
 	    if (!licenseMemoryFile.exists()){
 		licenseMemoryFile.createNewFile();
 	    }
