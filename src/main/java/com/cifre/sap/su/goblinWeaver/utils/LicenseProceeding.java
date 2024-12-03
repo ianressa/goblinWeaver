@@ -82,6 +82,7 @@ public class LicenseProceeding {
 		return newKey;
 	    }
 	    logger.info("Matched existing expression with key " + expressionMatchKey);
+	    LicenseMemory.appendToExpression(expressionMatchKey, inferredExpression);
 	    return expressionMatchKey;
 	} catch(MalformedURLException e){
 	    e.printStackTrace();

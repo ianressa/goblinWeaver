@@ -43,10 +43,17 @@ public class LicenseExpression implements Serializable {
 	}
     }
 
-    public LicenseExpression(LicenseExpression exp){
-	this.altNames = exp.altNames;
-	this.urls = exp.urls;
-	this.licenseText = normalizeText(exp.licenseText);
+    public LicenseExpression deepCopy(){
+	try {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    ObjectOutputStream oos = new ObjectOutputStream(baos);
+	    oos.writeObject(this);
+	    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+	    ObjectInputStream ois = new ObjectInputStream(bais);
+	    return (LicenseExpression) ois.readObject();
+	} catch (IOException | ClassNotFoundException e){
+	    return null;
+	}
     }
 
     public boolean isEmpty(){

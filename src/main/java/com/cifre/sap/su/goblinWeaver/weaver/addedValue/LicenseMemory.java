@@ -17,7 +17,10 @@ public class LicenseMemory {
     private static String emptyItemId = "0";
 
     public static void appendToExpression(String key, LicenseExpression expression){
-	LicenseExpression currentExpression = new LicenseExpression(currentMemory.get(key));
+	if (key.equals(emptyItemId)) {
+	    return;
+	}
+	LicenseExpression currentExpression = currentMemory.get(key).deepCopy();
 	currentExpression.altNames.addAll(expression.altNames);
 	currentExpression.urls.addAll(expression.urls);
 	if ((currentExpression.licenseText == null || currentExpression.licenseText.trim().isEmpty()) &&
@@ -49,11 +52,11 @@ public class LicenseMemory {
 	    if (key.equals(emptyItemId)) {
 		continue;
 	    }
-	    LicenseExpression gotExp = new LicenseExpression(currentMemory.get(key));
 	    gotExp.altNames.retainAll(expression.altNames);
 	    gotExp.urls.retainAll(expression.urls);
 	    if((!gotExp.altNames.isEmpty()) || (!gotExp.urls.isEmpty()) ||
 	       (gotExp.licenseText.equals(expression.licenseText))){
+	    LicenseExpression gotExp = currentMemory.get(key).deepCopy();
 		return key;
 	    }
 	}
