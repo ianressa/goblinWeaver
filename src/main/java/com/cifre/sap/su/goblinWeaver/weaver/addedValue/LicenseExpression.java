@@ -65,22 +65,30 @@ public class LicenseExpression implements Serializable {
     }
 
     public boolean fuzzyMatches(LicenseExpression expb){
-	for (String namea : this.altNames){
-	    for (String nameb : expb.altNames){
-		if (FuzzySearch.weightedRatio(namea, nameb) >= FUZZY_THRESHOLD){
+	for (String namea : this.altNames) {
+	    if (namea == null) {
+		continue;
+	    }
+	    for (String nameb : expb.altNames) {
+		if (nameb != null && FuzzySearch.weightedRatio(namea, nameb) >= FUZZY_THRESHOLD) {
 		    return true;
 		}
 	    }
 	}
-	for (URL urla : this.urls){
-	    for (URL urlb : expb.urls){
-		if (urla.toString().equals(urlb.toString())){
+	for (URL urla : this.urls) {
+	    if (urla == null) {
+		continue;
+	    }
+	    for (URL urlb : expb.urls) {
+		if (urlb != null && urla.equals(urlb)) {
 		    return true;
 		}
 	    }
 	}
-	if (FuzzySearch.weightedRatio(this.licenseText, expb.licenseText) >= FUZZY_THRESHOLD){
-	    return true;
+	if (this.licenseText != null && !this.licenseText.isEmpty() && expb.licenseText != null && !expb.licenseText.isEmpty()) {
+	    if (FuzzySearch.weightedRatio(this.licenseText, expb.licenseText) >= FUZZY_THRESHOLD) {
+		return true;
+	    }
 	}
 	return false;
     }
