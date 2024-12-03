@@ -11,6 +11,7 @@
 	    "The Apache Software License, Version 2.0",
 	    "Apache2",
 	    "Apachev2",
+	    "Apache",
 	],
 	"urls": [
 	    "https://www.apache.org/licenses/LICENSE-2.0.html",
@@ -150,6 +151,7 @@
 	    "GNU LESSER GENERAL PUBLIC LICENSE 2.1",
 	    "GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1, February 1999",
 	    "GNU LIBRARY GENERAL PUBLIC LICENSE, Version 2.1, February 1999",
+	    "LGPL 2.1",
 	],
 	"urls": [
 	    "https://opensource.org/license/lgpl-2-1",
@@ -174,6 +176,7 @@
 	    "GNU Lesser General Public License v3 (LGPL)",
 	    "GNU Lesser General Public License v3.0",
 	    "GNU Lesser General Public License version 3",
+	    "LGPL-3.0-only",
 	],
 	"urls": [
 	    "https://spdx.org/licenses/LGPL-3.0-only.html",
